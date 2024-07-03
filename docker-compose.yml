@@ -1,22 +1,41 @@
-# This YAML file configures a service for PostgreSQL using Docker Compose. 
+# This YAML file configures a service for PostgreSQL and MongoDb using Docker Compose. 
 services:
-  # Defining the service named 'postgres'
+  # Defining the service named 'postgres'.
   postgres:
     # Specifies the Docker image to use for the service.
     image: postgres
-    # Environment variables to set for the 'postgres' service
+    # Environment variables to set for the 'postgres' service.
     environment:
       - POSTGRES_PASSWORD=postgrespw   
     # Port mapping for the 'postgres' service.
     ports:
       # Maps port 5432 on the host to port 5432 on the container.
       - 5432:5432
-    # Volume mapping for the 'postgres' service
+    # Volume mapping for the 'postgres' service.
     volumes:
-      # Mounts a named volume 'pgdata' to the container directory 'var/lib/postgresql/data'
+      # Mounts a named volume 'pgdata' to the container directory 'var/lib/postgresql/data'.
       - pgdata:/var/lib/postgresql/data
+  
+  # Defining the service named 'mongodb'.
+  mongodb:
+    # Specifies the Docker image for the 'mongodb' service.
+    image: mongo
+    # Environment variables to set for the 'mongodb' service.
+    environment: 
+      - MONGO_INITDB_ROOT_USERNAME=root 
+      - MONGO_INITDB_ROOT_PASSWORD=mongopw
+    # Port mapping for the 'mongodb' service. 
+    ports:
+      # Maps port 27017 on the host to the port 27017 on the container.
+      - 27017:27017
+    # Volume mapping for the 'mongodb' service.
+    volumes:
+      # Mounts a named volume 'mongodata' to the container directory 'var/lib/mongodb/data'.
+      - mongodata:/var/lib/mongodb/data
 
 # Define named volumes used by the services
 volumes:
   # Declare a named volume 'pgdata' that will be used to persist PostgreSQL data.
   pgdata:
+  # Declare a named volume 'mongodata' that will be used to persist MongoDb data.
+  mongodata:
