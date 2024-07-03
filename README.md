@@ -1,2 +1,0 @@
-# WheelDeal
-Car Auction Website
