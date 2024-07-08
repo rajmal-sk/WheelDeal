@@ -1,9 +1,14 @@
+using System.Xml;
 using AuctionService.DTOs;
 using AuctionService.Entities;
 using AutoMapper;
+using Contracts;
 
 namespace AuctionService.RequestHelpers;
 
+/// <summary>
+/// This class defines the AutoMapper mapping profiles for the AuctionService.
+/// </summary>
 public class MappingProfiles : Profile
 {
     public MappingProfiles()
@@ -19,5 +24,14 @@ public class MappingProfiles : Profile
 
         // Maps CreateAuctionDto to Item.
         CreateMap<CreateAuctionDto, Item>();
+
+        // Maps AuctionDto to AuctionCreated.
+        CreateMap<AuctionDto, AuctionCreated>();
+
+        // Maps properties from Auction to AuctionUpdated, including properties form Item.
+        CreateMap<Auction, AuctionUpdated>().IncludeMembers(x => x.Item);
+
+        // Maps Item to AuctionUpdated.
+        CreateMap<Item, AuctionUpdated>();
     }
 }

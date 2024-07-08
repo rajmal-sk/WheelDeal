@@ -32,6 +32,16 @@ services:
     volumes:
       # Mounts a named volume 'mongodata' to the container directory 'var/lib/mongodb/data'.
       - mongodata:/var/lib/mongodb/data
+  
+  # Defining the service named 'raabitmq' along with the management features.
+  rabbitmq:
+     # Specifies the Docker image for the 'rabbitmq' service.
+    image: rabbitmq:3-management-alpine
+    ports:
+      # Maps port 5672 on the host to the port 5672 on the container for the messaging broker.
+      - 5672:5672
+      # Maps port 15672 on the host to the port 15672 on the container for the management service.
+      - 15672:15672
 
 # Define named volumes used by the services
 volumes:
