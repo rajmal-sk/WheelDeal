@@ -4,6 +4,7 @@ using AuctionService.Entities;
 using AutoMapper;
 using Contracts;
 using MassTransit;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -70,12 +71,13 @@ public class AuctionsController : ControllerBase
     /// <returns> An <see cref="ActionResult{T}"/> containing the created <see cref="AuctionDto"/>.
     /// If the auction creation fails, returns a <see cref="BadRequestResult"/>. </returns>
     [HttpPost]
+    [Authorize]
     public async Task<ActionResult<AuctionDto>> CreateAuction(CreateAuctionDto auctionDto)
     {
         Console.WriteLine("Request received and the date time is: {0} ", auctionDto.AuctionEnd);
         var auction = _mapper.Map<Auction>(auctionDto);
-        //TODO: add current user as seller
-        auction.Seller = "test";
+
+        auction.Seller = User.Identity.Name;
         _context.Auctions.Add(auction);
         var newAuction = _mapper.Map<AuctionDto>(auction);
         await _publishEndpoint.Publish(_mapper.Map<AuctionCreated>(newAuction));
@@ -93,11 +95,12 @@ public class AuctionsController : ControllerBase
     /// Returns <see cref="OkObjectResult"/> if the update is successful, <see cref="NotFoundResult"/> 
     /// if the auction does not exist, or <see cref="BadRequestResult"/> if the update fails.   </returns>
     [HttpPut("{id}")]
+    [Authorize]
     public async Task<ActionResult> UpdateAuction(Guid id, UpdateAuctionDto updateAuctionDto)
     {
         var auction = await _context.Auctions.Include(x => x.Item).FirstOrDefaultAsync(x => x.Id == id);
         if (auction == null) return NotFound();
-        //TODO: Authenticate Seller before update
+        if (auction.Seller != User.Identity.Name) return Forbid();
         auction.Item.Make = updateAuctionDto.Make ?? auction.Item.Make;
         auction.Item.Model = updateAuctionDto.Model ?? auction.Item.Model;
         auction.Item.Color = updateAuctionDto.Color ?? auction.Item.Color;
@@ -118,11 +121,12 @@ public class AuctionsController : ControllerBase
     /// <see cref="NotFoundResult"/> if the auction does not exist, or <see cref="BadRequestResult"/>
     /// if the deletion fails.</returns>
     [HttpDelete("{id}")]
+    [Authorize]
     public async Task<ActionResult> DeleteAuction(Guid id)
     {
         var auction = await _context.Auctions.FindAsync(id); // Need to rethink about this API. Not a best idea to delete auction. 
         if (auction == null) return NotFound();
-        //TODO: check seller == username
+        if (auction.Seller != User.Identity.Name) return Forbid();
         _context.Auctions.Remove(auction);
         await _publishEndpoint.Publish<AuctionDeleted>(new AuctionDeleted { Id = auction.Id.ToString() });
         var result = await _context.SaveChangesAsync() > 0;
