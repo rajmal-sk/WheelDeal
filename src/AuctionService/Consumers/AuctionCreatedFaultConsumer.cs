@@ -10,7 +10,11 @@ namespace AuctionService.Consumers;
 /// </summary>
 public class AuctionCreatedFaultConsumer : IConsumer<Fault<AuctionCreated>>
 {
-    // The consume method is called when a fault message for AuctionCreated is received.
+    /// <summary>
+    /// Consumes the AuctionCreated fault message and updates the auction and republishes the AuctionCreated message.
+    /// </summary>
+    /// <param name="context">The consume context containing the fault AuctionCreated message.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task Consume(ConsumeContext<Fault<AuctionCreated>> context)
     {
         // Log the start of fault connection.

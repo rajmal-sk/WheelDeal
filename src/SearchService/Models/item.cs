@@ -24,11 +24,11 @@ public class Item : Entity
     /// <summary>
     /// Amount for which the item was sold in the auction, if sold.
     /// </summary>
-    public int? SoldAmount { get; set; }
+    public int SoldAmount { get; set; }
     /// <summary>
     /// Current highest bid in the auction.
     /// </summary>
-    public int? CurrentHighBid { get; set; }
+    public int CurrentHighBid { get; set; }
     /// <summary>
     /// Date and time when the auction was created.
     /// </summary>
