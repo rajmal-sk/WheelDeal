@@ -14,8 +14,8 @@ services:
     # Volume mapping for the 'postgres' service.
     volumes:
       # Mounts a named volume 'pgdata' to the container directory 'var/lib/postgresql/data'.
-      - pgdata:/var/lib/postgresql/data
-  
+      - pgdata:/var/lib/postgresql/data  
+
   # Defining the service named 'mongodb'.
   mongodb:
     # Specifies the Docker image for the 'mongodb' service.
@@ -31,8 +31,7 @@ services:
     # Volume mapping for the 'mongodb' service.
     volumes:
       # Mounts a named volume 'mongodata' to the container directory 'var/lib/mongodb/data'.
-      - mongodata:/var/lib/mongodb/data
-  
+      - mongodata:/var/lib/mongodb/data 
   # Defining the service named 'raabitmq' along with the management features.
   rabbitmq:
      # Specifies the Docker image for the 'rabbitmq' service.
@@ -41,7 +40,105 @@ services:
       # Maps port 5672 on the host to the port 5672 on the container for the messaging broker.
       - 5672:5672
       # Maps port 15672 on the host to the port 15672 on the container for the management service.
-      - 15672:15672
+      - 15672:15672 
+
+  # Defining the service named 'auction-svc'. 
+  auction-svc:
+    # Specifies the Docker image for the 'auction-svc' service.
+    image: rajmal046/auction-svc:latest
+    # Build instructions for the 'auction-svc' service.
+    build:
+      # The build context directory.
+      context: .
+      # The path to the Dockerfile relative to the context.
+      dockerfile: src/AuctionService/Dockerfile
+    # Environment variables to set for the 'auction-svc' service.
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - RabbitMq__Host=rabbitmq
+      - ConnectionStrings__DefaultConnection=Server=postgres:5432;User Id=postgres;Password=postgrespw;Database=auctions
+      - IdentityServiceUrl=http://identity-svc
+    # Port mapping for the 'auction-svc' service.
+    ports:
+      # Maps port 7001 on the host to port 80 on the container.
+      - 7001:80
+    # Dependencies for the 'auction-svc' service.
+    depends_on:
+      # Ensures the 'postgres' service starts before this service.
+      - postgres
+      # Ensures the 'rabbitmq' service starts before this service.
+      - rabbitmq
+
+  # Defining the service named 'search-svc'. 
+  search-svc:
+    # Specifies the Docker image for the 'search-svc' service.
+    image: rajmal046/search-svc:latest
+    # Build instructions for the 'search-svc' service.
+    build:
+      # The build context directory.
+      context: .
+      # The path to the Dockerfile relative to the context.
+      dockerfile: src/SearchService/Dockerfile
+    # Environment variables to set for the 'search-svc' service.
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - RabbitMq__Host=rabbitmq
+      - ConnectionStrings__MongoDbConnection=mongodb://root:mongopw@mongodb
+    # Port mapping for the 'search-svc' service.
+    ports:
+      # Maps port 7002 on the host to port 80 on the container.
+      - 7002:80
+    # Dependencies for the 'search-svc' service.
+    depends_on:
+      # Ensures the 'mongodb' service starts before this service.
+      - mongodb
+      # Ensures the 'rabbitmq' service starts before this service.
+      - rabbitmq
+
+  # Defining the service named 'identity-svc'.
+  identity-svc:
+    # Specifies the Docker image for the 'identity-svc' service.
+    image: rajmal046/identity-svc:latest
+    # Build instructions for the 'identity-svc' service.
+    build:
+      # The build context directory.
+      context: .
+      # The path to the Dockerfile relative to the context.
+      dockerfile: src/IdentityService/Dockerfile
+    # Environment variables to set for the 'identity-svc' service.
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Server=postgres:5432;User Id=postgres;Password=postgrespw;Database=identity
+    # Port mapping for the 'identity-svc' service.
+    ports:
+      # Maps port 7004 on the host to port 80 on the container.
+      - 7004:80
+    # Dependencies for the 'identity-svc' service.
+    depends_on:
+      # Ensures the 'postgres' service starts before this service.
+      - postgres
+  
+  # Defining the service named 'gateway-svc'.
+  gateway-svc:
+    # Specifies the Docker image for the 'gateway-svc' service.
+    image: rajmal046/gateway-svc:latest
+    # Build instructions for the 'gateway-svc' service.
+    build:
+      # The build context directory.
+      context: .
+      # The path to the Dockerfile relative to the context.
+      dockerfile: src/GatewayService/Dockerfile
+    # Environment variables to set for the 'gateway-svc' service.
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:80
+    # Port mapping for the 'gateway-svc' service.
+    ports:
+      # Maps port 6001 on the host to port 80 on the container.
+      - 6001:80
 
 # Define named volumes used by the services
 volumes:

@@ -25,7 +25,8 @@ public class BidPlacedConsumer : IConsumer<BidPlaced>
         var auction = await DB.Find<Item>().OneAsync(context.Message.AuctionId);
         // If there is no current high bid, or if the bid status is "Accepted" and the new bid amount 
         // is higher than the current high bid, update the current high bid to the new bid amount.
-        if (context.Message.BidStatus.Contains("Accepted") && context.Message.Amount > auction.CurrentHighBid)
+        if (auction.CurrentHighBid == null ||
+        context.Message.BidStatus.Contains("Accepted") && context.Message.Amount > auction.CurrentHighBid)
         {
             auction.CurrentHighBid = context.Message.Amount;
             // Save the changes to the database.

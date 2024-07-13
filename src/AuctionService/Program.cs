@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 
 // Configure the application to use PostgreSQL as the database provider for the AuctionDbContext.
@@ -42,24 +41,35 @@ builder.Services.AddMassTransit(x =>
     // Configure MassTransit to use RabbitMQ as the transport.
     x.UsingRabbitMq((context, cfg) =>
     {
+        cfg.Host(builder.Configuration["RabbitMq:Host"], "/", host =>
+        {
+            host.Username(builder.Configuration.GetValue("RabbitMq:Username", "guest"));
+            host.Password(builder.Configuration.GetValue("RabbitMq:Password", "guest"));
+        });
+
         // Automatically configure RabbitMQ endpoints based on registerd consumers.
         cfg.ConfigureEndpoints(context);
     });
 });
 
+// Add authentication services using JWT Bearer tokens
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        // Set the authority to validate the tokens
         options.Authority = builder.Configuration["IdentityServiceUrl"];
+        // Disable HTTPS metadata requirement (useful for development environments)
         options.RequireHttpsMetadata = false;
-        options.TokenValidationParameters.ValidateAudience = false;
-        options.TokenValidationParameters.NameClaimType = "username";
+        // Configure token validation parameters
+        options.TokenValidationParameters.ValidateAudience = false; // Do not validate audience
+        options.TokenValidationParameters.NameClaimType = "username"; // Set the name claim type to "username"
     });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Use the authentication middleware
 app.UseAuthentication();
+// Use the authorization middleware
 app.UseAuthorization();
 
 app.MapControllers();
