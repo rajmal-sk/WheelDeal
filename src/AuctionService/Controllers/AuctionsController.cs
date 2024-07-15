@@ -108,7 +108,7 @@ public class AuctionsController : ControllerBase
         auction.Item.Mileage = updateAuctionDto.Mileage ?? auction.Item.Mileage;
         await _publishEndpoint.Publish(_mapper.Map<AuctionUpdated>(auction));
         var result = await _context.SaveChangesAsync() > 0;
-        if (result) return Ok("Updated successfully");
+        if (result) return Ok();
         return BadRequest("Error: Could not save changes");
     }
 
@@ -131,6 +131,6 @@ public class AuctionsController : ControllerBase
         await _publishEndpoint.Publish<AuctionDeleted>(new AuctionDeleted { Id = auction.Id.ToString() });
         var result = await _context.SaveChangesAsync() > 0;
         if (!result) return BadRequest("Error: Auction Not Found");
-        return Ok("Successfully removed the auction");
+        return Ok();
     }
 }
