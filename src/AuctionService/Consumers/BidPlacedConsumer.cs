@@ -30,9 +30,8 @@ public class BidPlacedConsumer : IConsumer<BidPlaced>
     {
         // Log the start of fault connection.
         Console.WriteLine("---> Consuming bid placed");
-
         // Retrieve the auction from the database using the AuctionId from the message.
-        var auction = await _dbcontext.Auctions.FindAsync(context.Message.AuctionId);
+        var auction = await _dbcontext.Auctions.FindAsync(Guid.Parse(context.Message.AuctionId));
         // If there is no current high bid, or if the bid status is "Accepted" and the new bid amount 
         // is higher than the current high bid, update the current high bid to the new bid amount.
         if (auction.CurrentHighBid == null

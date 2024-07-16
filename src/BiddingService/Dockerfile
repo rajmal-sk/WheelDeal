@@ -19,10 +19,11 @@ COPY src/BiddingService/BiddingService.csproj src/BiddingService/BiddingService.
 RUN dotnet restore WheelDeal.sln
 
 # Copy the source code of the necessary projects to the working directory
-COPY src/IdentityService src/IdentityService
+COPY src/BiddingService src/BiddingService
+COPY src/Contracts src/Contracts
 
 # Set the working directory to the AuctionService project
-WORKDIR /app/src/IdentityService
+WORKDIR /app/src/BiddingService
 
 # Publish the AuctionService project in Release configuration to the output directory
 RUN dotnet publish -c Release -o /app/src/out 
@@ -34,4 +35,4 @@ WORKDIR /app
 # Copy the published output from the build environment to the runtime environment
 COPY --from=build /app/src/out .
 # Set the entry point for the application
-ENTRYPOINT [ "dotnet", "IdentityService.dll" ]
+ENTRYPOINT [ "dotnet", "BiddingService.dll" ]

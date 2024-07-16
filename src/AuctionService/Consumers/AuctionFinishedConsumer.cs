@@ -32,7 +32,7 @@ public class AuctionFinishedConsumer : IConsumer<AuctionFinished>
         Console.WriteLine("---> Consuming auction finished");
 
         // Retrieve the auction from the database using the AuctionId from the message.
-        var auction = await _dbcontext.Auctions.FindAsync(context.Message.AuctionId);
+        var auction = await _dbcontext.Auctions.FindAsync(Guid.Parse(context.Message.AuctionId));
         // If the item was sold, update the auction's winner and sold amount.
         if (context.Message.ItemSold)
         {

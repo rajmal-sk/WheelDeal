@@ -56,13 +56,20 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_URLS=http://+:7777  
       - RabbitMq__Host=rabbitmq
       - ConnectionStrings__DefaultConnection=Server=postgres:5432;User Id=postgres;Password=postgrespw;Database=auctions
       - IdentityServiceUrl=http://identity-svc
+      - Kestrel__Endpoints__WebApi__Protocols=Http1
+      - Kestrel__Endpoints__WebApi__Url=http://+:80
+      - Kestrel__Endpoints__Grpc__Protocols=Http2
+      - Kestrel__Endpoints__Grpc__Url=http://+:7777
     # Port mapping for the 'auction-svc' service.
     ports:
       # Maps port 7001 on the host to port 80 on the container.
       - 7001:80
+      # Maps port 7777 on the host to port 7777 on the container.
+      - 7777:7777
     # Dependencies for the 'auction-svc' service.
     depends_on:
       # Ensures the 'postgres' service starts before this service.
@@ -139,6 +146,35 @@ services:
     ports:
       # Maps port 6001 on the host to port 80 on the container.
       - 6001:80
+
+  # Defining the service named 'bids-svc'. 
+  bids-svc:
+    # Specifies the Docker image for the 'bids-svc' service.
+    image: rajmal046/bids-svc:latest
+    # Build instructions for the 'bids-svc' service.
+    build:
+      # The build context directory.
+      context: .
+      # The path to the Dockerfile relative to the context.
+      dockerfile: src/BiddingService/Dockerfile
+    # Environment variables to set for the 'bids-svc' service.
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - RabbitMq__Host=rabbitmq
+      - ConnectionStrings__BidDbConnection=mongodb://root:mongopw@mongodb
+      - IdentityServiceUrl=http://identity-svc
+      - GrpcAuction=http://auction-svc:7777
+    # Port mapping for the 'bids-svc' service.
+    ports:
+      # Maps port 7003 on the host to port 80 on the container.
+      - 7003:80
+    # Dependencies for the 'bids-svc' service.
+    depends_on:
+      # Ensures the 'mongodb' service starts before this service.
+      - mongodb
+      # Ensures the 'rabbitmq' service starts before this service.
+      - rabbitmq
 
 # Define named volumes used by the services
 volumes:
