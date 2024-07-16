@@ -18,7 +18,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters.ValidateAudience = false; // Do not validate audience
         options.TokenValidationParameters.NameClaimType = "username"; // Set the name claim type to "username"
     });
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("customPolicy", b =>
+    {
+        b.AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials()
+            .WithOrigins(builder.Configuration["ClientApp"]);
+    });
+});
+
 var app = builder.Build();
+
+app.UseCors();
 
 // Map the reverse proxy routes
 app.MapReverseProxy();
