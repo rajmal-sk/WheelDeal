@@ -175,6 +175,30 @@ services:
       - mongodb
       # Ensures the 'rabbitmq' service starts before this service.
       - rabbitmq
+   # Defining the service named 'bids-svc'. 
+
+  notification-svc:
+    # Specifies the Docker image for the 'notification-svc' service.
+    image: rajmal046/notification-svc:latest
+    # Build instructions for the 'notification-svc' service.
+    build:
+      # The build context directory.
+      context: .
+      # The path to the Dockerfile relative to the context.
+      dockerfile: src/NotificationService/Dockerfile
+    # Environment variables to set for the 'notification-svc' service.
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - RabbitMq__Host=rabbitmq
+    # Port mapping for the 'notification-svc' service.
+    ports:
+      # Maps port 7005 on the host to port 80 on the container.
+      - 7005:80
+    # Dependencies for the 'notification-svc' service.
+    depends_on:
+      # Ensures the 'rabbitmq' service starts before this service.
+      - rabbitmq
 
 # Define named volumes used by the services
 volumes:
