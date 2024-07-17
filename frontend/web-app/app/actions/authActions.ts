@@ -1,12 +1,12 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "../api/auth/[...nextauth]/route";
+import { getServerAuthSession } from "@/auth";
 import {headers, cookies} from 'next/headers'
 import { NextApiRequest } from "next";
 import { getToken } from "next-auth/jwt";
 
 export async function getSession( )
 {
-    return await getServerSession(authOptions);
+    return await getServerAuthSession();
 }
 
 export async function getCurrentUser() {

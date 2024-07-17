@@ -1,4 +1,4 @@
-import { numberFormatter } from '@/lib/numberFormatter';
+import { numberFormatter } from '@/app/lib/numberFormatter';
 import { Bid } from '@/types'
 import { format } from 'date-fns';
 import React from 'react'

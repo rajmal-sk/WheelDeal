@@ -1,6 +1,6 @@
 'use client'
 import { placeBidForAuction } from '@/app/actions/auctionAction'
-import { numberFormatter } from '@/lib/numberFormatter'
+import { numberFormatter } from '@/app/lib/numberFormatter'
 import { useBidStore } from '@/hooks/useBidStore'
 import React from 'react'
 import { FieldValues, useForm } from 'react-hook-form'

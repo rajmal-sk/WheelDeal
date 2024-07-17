@@ -1,4 +1,4 @@
-import { numberFormatter } from '@/lib/numberFormatter'
+import { numberFormatter } from '@/app/lib/numberFormatter'
 import { Auction, AuctionFinished } from '@/types'
 import Image from 'next/image'
 import Link from 'next/link'

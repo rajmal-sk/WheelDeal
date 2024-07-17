@@ -1,3 +1,8 @@
+networks:
+  custom:
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
 # This YAML file configures a service for PostgreSQL and MongoDb using Docker Compose. 
 services:
   # Defining the service named 'postgres'.
@@ -14,7 +19,9 @@ services:
     # Volume mapping for the 'postgres' service.
     volumes:
       # Mounts a named volume 'pgdata' to the container directory 'var/lib/postgresql/data'.
-      - pgdata:/var/lib/postgresql/data  
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      custom:  
 
   # Defining the service named 'mongodb'.
   mongodb:
@@ -32,6 +39,9 @@ services:
     volumes:
       # Mounts a named volume 'mongodata' to the container directory 'var/lib/mongodb/data'.
       - mongodata:/var/lib/mongodb/data 
+    networks:
+      custom:
+
   # Defining the service named 'raabitmq' along with the management features.
   rabbitmq:
      # Specifies the Docker image for the 'rabbitmq' service.
@@ -41,6 +51,8 @@ services:
       - 5672:5672
       # Maps port 15672 on the host to the port 15672 on the container for the management service.
       - 15672:15672 
+    networks:
+      custom:
 
   # Defining the service named 'auction-svc'. 
   auction-svc:
@@ -76,6 +88,8 @@ services:
       - postgres
       # Ensures the 'rabbitmq' service starts before this service.
       - rabbitmq
+    networks:
+      custom:
 
   # Defining the service named 'search-svc'. 
   search-svc:
@@ -103,6 +117,8 @@ services:
       - mongodb
       # Ensures the 'rabbitmq' service starts before this service.
       - rabbitmq
+    networks:
+      custom:
 
   # Defining the service named 'identity-svc'.
   identity-svc:
@@ -119,15 +135,16 @@ services:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:80
       - ConnectionStrings__DefaultConnection=Server=postgres:5432;User Id=postgres;Password=postgrespw;Database=identity
-    # Port mapping for the 'identity-svc' service.
-    ports:
-      # Maps port 7004 on the host to port 80 on the container.
-      - 7004:80
+      - VIRTUAL_HOST=id.wheeldeal.com
+      - ClientApp=http://app.wheeldeal.com
     # Dependencies for the 'identity-svc' service.
     depends_on:
       # Ensures the 'postgres' service starts before this service.
       - postgres
-  
+    networks:
+      custom:
+        ipv4_address: 10.5.0.200
+
   # Defining the service named 'gateway-svc'.
   gateway-svc:
     # Specifies the Docker image for the 'gateway-svc' service.
@@ -142,10 +159,11 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:80
+      - ClientApp=https://app.wheeldeal.com
+      - VIRTUAL_HOST=api.wheeldeal.com
     # Port mapping for the 'gateway-svc' service.
-    ports:
-      # Maps port 6001 on the host to port 80 on the container.
-      - 6001:80
+    networks:
+      custom:
 
   # Defining the service named 'bids-svc'. 
   bids-svc:
@@ -176,6 +194,8 @@ services:
       # Ensures the 'rabbitmq' service starts before this service.
       - rabbitmq
    # Defining the service named 'bids-svc'. 
+    networks:
+      custom:
 
   notification-svc:
     # Specifies the Docker image for the 'notification-svc' service.
@@ -199,6 +219,40 @@ services:
     depends_on:
       # Ensures the 'rabbitmq' service starts before this service.
       - rabbitmq
+    networks:
+      custom:
+
+  web-app:
+    image: rajmal046/web-app
+    build: 
+      context: .
+      dockerfile: frontend/web-app/Dockerfile
+    volumes:
+      - /var/lib/web/data
+    extra_hosts:
+      - id.wheeldeal.com:10.5.0.200
+    environment:
+      - NEXTAUTH_SECRET=somethingreallyreallysecret
+      - NEXTAUTH_URL=http://app.wheeldeal.com
+      - NEXTAUTH_URL_INTERNAL=http://web-app:3000
+      - API_URL=http://gateway-svc/
+      - ID_URL=http://id.wheeldeal.com
+      - NEXT_PUBLIC_NOTIFY_URL=http://gateway-svc/notifications
+      - VIRTUAL_HOST=app.wheeldeal.com
+      - VIRTUAL_PORT=3000
+    networks:
+      custom:
+  
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      custom:
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./devcerts:/etc/nginx/certs
 
 # Define named volumes used by the services
 volumes:
